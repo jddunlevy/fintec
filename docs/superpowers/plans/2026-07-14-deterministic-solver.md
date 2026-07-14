@@ -620,7 +620,7 @@ export function evaluateResponse(text, fns = buildFunctionTable(globalThis.formu
 - [ ] **Step 4: Run tests to verify they pass**
 
 Run: `node tests/engine.test.mjs`
-Expected: `ALL TESTS PASS (56)`, exit code 0.
+Expected: `ALL TESTS PASS (57)`, exit code 0.
 
 - [ ] **Step 5: Commit**
 
@@ -720,7 +720,7 @@ import('./js/engine.js').then((m) =>
 
 Expected: array of 2 entries; the second has `kind: 'formula'`, `value: '47,633.36'`. This proves the vendored script tag exposed `window.formulajs` to the engine's browser default path.
 
-Also run `node tests/engine.test.mjs` — Expected: `ALL TESTS PASS (56)` (unchanged).
+Also run `node tests/engine.test.mjs` — Expected: `ALL TESTS PASS (57)` (unchanged).
 
 - [ ] **Step 5: Commit**
 
@@ -794,7 +794,7 @@ In the `| Mistake | Why It's Wrong |` table, add two rows at the end:
 - [ ] **Step 5: Verify and commit**
 
 Run: `node tests/engine.test.mjs`
-Expected: `ALL TESTS PASS (56)` (prompt change touches no code).
+Expected: `ALL TESTS PASS (57)` (prompt change touches no code).
 
 Read the modified `finance-solver-skill.txt` end to end and confirm: the function list matches `FUNCTION_NAMES` in `js/engine.js` exactly; the placeholder example matches the Task 4 test input.
 
