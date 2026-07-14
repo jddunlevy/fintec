@@ -3,6 +3,7 @@
 import * as Camera from './camera.js';
 import * as Api from './api.js';
 import { canvasToBase64Jpeg } from './image.js';
+import { evaluateResponse } from './engine.js';
 
 const AppState = {
   SETUP: 'setup',           // no key in localStorage
@@ -172,21 +173,22 @@ async function onCapture() {
 }
 
 // ---- results rendering ----
-// Lines starting with "=" are formulas (large white); all else is label/note
-// (gray). Content rendered verbatim via textContent — no markup interpretation.
+// Engine annotates each line; formulas that computed get a "→ value" line.
+// Content rendered verbatim via textContent — no markup interpretation.
 
 function renderResults(text) {
   els.resultsScroll.replaceChildren();
-  const lines = text
-    .split('\n')
-    .map((line) => line.trim())
-    .filter((line) => line.length > 0);
-
-  for (const line of lines) {
+  for (const line of evaluateResponse(text)) {
     const div = document.createElement('div');
-    div.className = line.startsWith('=') ? 'line-formula' : 'line-label';
-    div.textContent = line;
+    div.className = line.kind === 'formula' ? 'line-formula' : 'line-label';
+    div.textContent = line.text;
     els.resultsScroll.appendChild(div);
+    if (line.value !== null) {
+      const val = document.createElement('div');
+      val.className = 'line-value';
+      val.textContent = `\u2192 ${line.value}`;
+      els.resultsScroll.appendChild(val);
+    }
   }
   els.resultsScroll.scrollTop = 0;
 }

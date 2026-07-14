@@ -220,6 +220,17 @@ html, body {
   -webkit-user-select: text;
 }
 
+/* Computed answer: produced by the engine, never by the LLM. */
+.line-value {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--fg);
+  margin: 0 0 12px;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
 /* ---- error ---- */
 
 .error-inner {
