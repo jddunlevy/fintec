@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="FINSOLVER">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-180.png">
+  <link rel="stylesheet" href="style.css">
+  <title>FINANCE SOLVER</title>
+</head>
+<body>
+
+  <!-- SETUP: no key in localStorage, or key cleared after 401 -->
+  <section id="screen-setup" class="screen">
+    <div class="setup-inner">
+      <h1 class="title">FINANCE SOLVER<span class="cursor">▌</span></h1>
+      <div class="rule">────────────────────────</div>
+      <p class="dim">PHOTOGRAPH A FINANCE PROBLEM.<br>GET EXCEL FORMULAS.</p>
+
+      <p id="setup-notice" hidden></p>
+
+      <div class="field">
+        <label class="dim small" for="key-input">ANTHROPIC API KEY:</label>
+        <input id="key-input" type="text" autocomplete="off" autocapitalize="none"
+               autocorrect="off" spellcheck="false" placeholder="sk-ant-...">
+        <a class="dim small underline" href="https://console.anthropic.com"
+           target="_blank" rel="noopener">GET A KEY: CONSOLE.ANTHROPIC.COM</a>
+      </div>
+
+      <div class="setup-actions">
+        <button id="btn-validate" class="btn" type="button">[ VALIDATE ]</button>
+        <span id="setup-status" class="small"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- CAMERA: live viewfinder -->
+  <section id="screen-camera" class="screen">
+    <div id="viewfinder">
+      <video id="preview" autoplay playsinline muted></video>
+    </div>
+    <p id="camera-denied" class="denied dim" hidden>CAMERA ACCESS DENIED<br>ENABLE IN SETTINGS</p>
+    <p id="camera-tip" class="tip" hidden>TIP: FILL THE FRAME WITH THE PROBLEM</p>
+    <div class="bottom-bar">
+      <button id="btn-capture" class="btn on-black" type="button" hidden>[ CAPTURE ]</button>
+    </div>
+  </section>
+
+  <!-- PROCESSING: frozen captured frame + indicator -->
+  <section id="screen-processing" class="screen">
+    <img id="frozen-frame" alt="">
+    <div class="processing-label">PROCESSING...<span class="cursor">▌</span></div>
+  </section>
+
+  <!-- RESULTS: raw formula text from Claude -->
+  <section id="screen-results" class="screen">
+    <div id="results-scroll"></div>
+    <div class="rule center">────────────────────────</div>
+    <div class="bottom-bar">
+      <button id="btn-another" class="btn" type="button">[ SOLVE ANOTHER ]</button>
+    </div>
+  </section>
+
+  <!-- ERROR: user-facing message + retry -->
+  <section id="screen-error" class="screen">
+    <div class="error-inner">
+      <p class="dim small">ERROR</p>
+      <p id="error-message"></p>
+    </div>
+    <div class="bottom-bar">
+      <button id="btn-retry" class="btn" type="button">[ TRY AGAIN ]</button>
+    </div>
+  </section>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
