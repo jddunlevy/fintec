@@ -489,7 +489,7 @@ git commit -m "feat: whitelist finance functions dispatched to vendored formulaj
 
 **Interfaces:**
 - Consumes: `evaluateFormula`, `buildFunctionTable` from Tasks 2–3.
-- Produces: `formatValue(value: number) -> string` (named export) — `|value| < 1`: 4 decimals plus percent, e.g. `"0.1268 (12.68%)"`; otherwise `en-US` thousands separators with 2 decimals, e.g. `"47,633.36"`.
+- Produces: `formatValue(value: number) -> string` (named export) — `0 < |value| < 1`: 4 decimals plus percent, e.g. `"0.1268 (12.68%)"`; otherwise `en-US` thousands separators with 2 decimals, e.g. `"47,633.36"`.
 - Produces: `evaluateResponse(text: string, fns?: object|null) -> Array<{text: string, kind: 'formula'|'text', value: string|null}>` (named export) — the non-empty trimmed lines of Claude's response in order. `fns` defaults to `buildFunctionTable(globalThis.formulajs)` (the browser path; `window.formulajs` is set by the vendored script tag added in Task 5). This is the function `app.js` calls in Task 5.
 
 Behavior contract (from the spec):
@@ -566,11 +566,11 @@ Add to the end of `js/engine.js`:
 
 ```js
 /**
- * |value| < 1 → rate/ratio presentation: 4 decimals + percent equivalent.
+ * 0 < |value| < 1 → rate/ratio presentation: 4 decimals + percent equivalent.
  * Otherwise → currency-scale: thousands separators, 2 decimals.
  */
 export function formatValue(value) {
-  if (Math.abs(value) < 1) {
+  if (value !== 0 && Math.abs(value) < 1) {
     return `${value.toFixed(4)} (${(value * 100).toFixed(2)}%)`;
   }
   return value.toLocaleString('en-US', {

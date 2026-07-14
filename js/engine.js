@@ -197,11 +197,11 @@ export function evaluateFormula(formula, fns, vars = {}) {
 }
 
 /**
- * |value| < 1 → rate/ratio presentation: 4 decimals + percent equivalent.
+ * 0 < |value| < 1 → rate/ratio presentation: 4 decimals + percent equivalent.
  * Otherwise → currency-scale: thousands separators, 2 decimals.
  */
 export function formatValue(value) {
-  if (Math.abs(value) < 1) {
+  if (value !== 0 && Math.abs(value) < 1) {
     return `${value.toFixed(4)} (${(value * 100).toFixed(2)}%)`;
   }
   return value.toLocaleString('en-US', {

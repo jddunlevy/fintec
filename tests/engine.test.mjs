@@ -107,6 +107,7 @@ equal('format small = rate/ratio', formatValue(0.12682503), '0.1268 (12.68%)');
 equal('format negative currency', formatValue(-864.0967), '-864.10');
 equal('format 5%', formatValue(0.05), '0.0500 (5.00%)');
 equal('format small integer', formatValue(4), '4.00');
+equal('format zero as plain number', formatValue(0), '0.00');
 
 // ---- response-level evaluation ----
 const chained = evaluateResponse(
