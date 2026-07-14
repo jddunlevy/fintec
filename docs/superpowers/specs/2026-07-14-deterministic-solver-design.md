@@ -57,7 +57,7 @@ New files:
 - `js/engine.js` — formula parser + evaluator (our code)
 - `js/vendor/formulajs.min.js` — vendored single-file copy of formulajs
   (Excel-matching implementations of NPV, IRR, MIRR, PMT, PV, FV, RATE, NPER,
-  PRICE, YIELD, ...). No npm, no build step; committed like any other file.
+  EFFECT, NOMINAL, ...). No npm, no build step; committed like any other file.
 
 Properties:
 
@@ -69,7 +69,10 @@ Properties:
 ## FormulaEngine (js/engine.js)
 
 **Input:** Claude's raw response text.
-**Output:** ordered blocks `{ label, formula, value | null, note? }`.
+**Output:** the response's non-empty lines in order, each annotated:
+`{ text, kind: 'formula' | 'text', value: string | null }` — `value` is the
+formatted computed result for formula lines that evaluated successfully.
+This preserves the existing verbatim line-by-line rendering.
 
 ### Response parsing
 
@@ -124,9 +127,12 @@ Additive tightening; the human-readable format is unchanged:
    arithmetic, `{...}` arrays, `[PLACEHOLDER]`s. Never cell references,
    ranges, strings, or named ranges.
 2. **Whitelisted functions** — the skill lists the functions the engine
-   supports (NPV, IRR, MIRR, PMT, PV, FV, RATE, NPER, PRICE, YIELD, plus plain
-   arithmetic). Claude must prefer these; others still display but get no
-   computed value.
+   supports: NPV, IRR, MIRR, PMT, PV, FV, RATE, NPER, EFFECT, NOMINAL,
+   AVERAGE, STDEV.S, STDEV.P, SUM, SQRT, ABS, ROUND, MAX, MIN, plus plain
+   arithmetic. Claude must prefer these; others still display but get no
+   computed value. Bond problems must be solved with per-period
+   PV/RATE/PMT/FV/NPER — never PRICE/YIELD, which require dates (the grammar
+   has no dates or strings).
 3. **Placeholder discipline** — a placeholder must exactly match an earlier
    step's declared name. The step label line ends with the name in brackets:
    `Step 1 - NPV [NPV_STEP1]:`.
@@ -165,10 +171,11 @@ unchanged. Evaluation failures are not app errors:
 
 The engine is pure logic and gets real tests:
 
-- `tests/engine.test.html` — browser-openable, framework-free test page:
+- `tests/engine.test.mjs` — framework-free, run with `node tests/engine.test.mjs`
+  (the vendored formulajs UMD bundle loads in Node as well as the browser):
   assertions comparing engine output against Excel-verified expected values
   for each supported function, operator precedence, `%` handling, array
-  literals, placeholder chaining, and each failure mode.
+  literals, placeholder chaining, and each failure mode. Exit code 0 = pass.
 - Golden cases across course topics: TVM lump sum, annuity due, bond
   price/YTM, DDM stock value, CAPM, WACC, NPV/IRR/MIRR/PI/payback chains,
   a ratio problem.
