@@ -1,6 +1,6 @@
 // Engine test suite — framework-free. Run: node tests/engine.test.mjs
 import { createRequire } from 'node:module';
-import { evaluateFormula, EngineError } from '../js/engine.js';
+import { evaluateFormula, EngineError, buildFunctionTable } from '../js/engine.js';
 
 const require = createRequire(import.meta.url);
 const formulajs = require('../js/vendor/formulajs.min.js');
@@ -68,6 +68,38 @@ throws('unbalanced paren throws', () => evaluateFormula('=(2+3', null));
 throws('trailing garbage throws', () => evaluateFormula('=2+2 4', null));
 throws('bad character throws', () => evaluateFormula('=2+$3', null));
 throws('division by zero throws (non-finite)', () => evaluateFormula('=1/0', null));
+
+// ---- finance golden tests (via vendored formulajs) ----
+const FNS = buildFunctionTable(formulajs);
+
+// TVM
+approx('FV lump sum', evaluateFormula('=FV(8%,10,0,-1000)', FNS), 2158.92, 0.01);
+approx('FV annuity due', evaluateFormula('=FV(8%,10,-1000,0,1)', FNS), 15645.49, 0.01);
+approx('PMT loan payment', evaluateFormula('=PMT(5%,10,-10000)', FNS), 1295.05, 0.01);
+approx('RATE (inverse of PMT case)', evaluateFormula('=RATE(10,-1295.0457496545667,10000)', FNS), 0.05, 1e-6);
+approx('NPER (inverse of PMT case)', evaluateFormula('=NPER(5%,-1295.0457496545667,10000)', FNS), 10, 1e-6);
+
+// Bonds via per-period PV/RATE (no PRICE/YIELD — they need dates)
+approx('bond price: 20 semiannual periods, 3% coupon, 4% yield',
+  evaluateFormula('=-PV(4%,20,30,1000)', FNS), 864.10, 0.01);
+approx('bond YTM per period',
+  evaluateFormula('=RATE(20,30,-864.0967365,1000)', FNS), 0.04, 1e-6);
+
+// Capital budgeting
+approx('NPV', evaluateFormula('=NPV(10%,50000,60000,70000)-100000', FNS), 47633.36, 0.01);
+approx('IRR', evaluateFormula('=IRR({-100000,50000,60000,70000})', FNS), 0.3388, 0.0005);
+approx('MIRR', evaluateFormula('=MIRR({-100000,50000,60000,70000},10%,10%)', FNS), 0.2526, 0.0005);
+
+// Interest rates
+approx('EFFECT', evaluateFormula('=EFFECT(12%,12)', FNS), 0.1268250301, 1e-6);
+
+// Risk & return
+approx('AVERAGE of returns', evaluateFormula('=AVERAGE({10%,20%,-6%})', FNS), 0.08, 1e-9);
+approx('STDEV.S of returns', evaluateFormula('=STDEV.S({0.1,0.2,-0.06})', FNS), 0.1311, 0.0005);
+approx('SQRT', evaluateFormula('=SQRT(0.0172)', FNS), 0.131149, 1e-4);
+
+// Whitelist enforcement: XNPV exists in formulajs but is NOT whitelisted
+throws('non-whitelisted function throws', () => evaluateFormula('=XNPV(0.1,{1,2},{1,2})', FNS));
 
 // ---- summary ----
 if (failures.length === 0) {

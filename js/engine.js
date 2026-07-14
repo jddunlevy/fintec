@@ -5,6 +5,30 @@
 
 export class EngineError extends Error {}
 
+/** The only functions the engine evaluates. Must match the skill prompt. */
+const FUNCTION_NAMES = [
+  'NPV', 'IRR', 'MIRR', 'PMT', 'PV', 'FV', 'RATE', 'NPER',
+  'EFFECT', 'NOMINAL',
+  'AVERAGE', 'STDEV.S', 'STDEV.P', 'SUM',
+  'SQRT', 'ABS', 'ROUND', 'MAX', 'MIN',
+];
+
+/**
+ * Maps whitelisted names to formulajs implementations.
+ * Returns null when formulajs is unavailable (engine degrades to
+ * arithmetic-only; every function call yields value: null upstream).
+ */
+export function buildFunctionTable(fjs) {
+  if (!fjs) return null;
+  const table = {};
+  for (const name of FUNCTION_NAMES) {
+    const fn = fjs[name]
+      ?? name.split('.').reduce((obj, key) => (obj ? obj[key] : undefined), fjs);
+    if (typeof fn === 'function') table[name] = fn;
+  }
+  return table;
+}
+
 // ---- tokenizer ----
 
 function tokenize(src) {
