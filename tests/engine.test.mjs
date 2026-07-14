@@ -1,6 +1,6 @@
 // Engine test suite — framework-free. Run: node tests/engine.test.mjs
 import { createRequire } from 'node:module';
-import { evaluateFormula, EngineError, buildFunctionTable } from '../js/engine.js';
+import { evaluateFormula, EngineError, buildFunctionTable, formatValue, evaluateResponse } from '../js/engine.js';
 
 const require = createRequire(import.meta.url);
 const formulajs = require('../js/vendor/formulajs.min.js');
@@ -100,6 +100,51 @@ approx('SQRT', evaluateFormula('=SQRT(0.0172)', FNS), 0.131149, 1e-4);
 
 // Whitelist enforcement: XNPV exists in formulajs but is NOT whitelisted
 throws('non-whitelisted function throws', () => evaluateFormula('=XNPV(0.1,{1,2},{1,2})', FNS));
+
+// ---- formatting ----
+equal('format currency', formatValue(47633.35837716), '47,633.36');
+equal('format small = rate/ratio', formatValue(0.12682503), '0.1268 (12.68%)');
+equal('format negative currency', formatValue(-864.0967), '-864.10');
+equal('format 5%', formatValue(0.05), '0.0500 (5.00%)');
+equal('format small integer', formatValue(4), '4.00');
+
+// ---- response-level evaluation ----
+const chained = evaluateResponse(
+  [
+    'Step 1 - Calculate NPV [NPV_STEP1]:',
+    '=-2000000+NPV(9%,500000,500000,500000,500000,500000)',
+    'Step 2 - Calculate EAA using NPV from Step 1:',
+    '=PMT(9%, 5, -[NPV_STEP1], 0, 0)',
+    '',
+    'Note: NPV < 0 means reject',
+  ].join('\n'),
+  FNS,
+);
+equal('chained: line count (blank dropped)', chained.length, 5);
+equal('chained: label kind', chained[0].kind, 'text');
+equal('chained: label has no value', chained[0].value, null);
+equal('chained: step 1 value', chained[1].value, '-55,174.37');
+equal('chained: step 2 kind', chained[3].kind, 'formula');
+check('chained: step 2 uses computed step 1',
+  chained[3].value !== null && chained[3].value.startsWith('-14,184.9'),
+  `got ${chained[3].value}`);
+equal('chained: note preserved verbatim', chained[4].text, 'Note: NPV < 0 means reject');
+
+// failure containment: one bad line never poisons the rest
+const contained = evaluateResponse('A:\n=FOO(1,2)\nB:\n=2+2', FNS);
+equal('containment: unknown fn yields null', contained[1].value, null);
+equal('containment: later formula still computes', contained[3].value, '4.00');
+
+const unresolved = evaluateResponse('=[MISSING]+1', FNS);
+equal('containment: unresolved placeholder yields null', unresolved[0].value, null);
+
+const malformed = evaluateResponse('=NPV(10%,', FNS);
+equal('containment: malformed formula yields null', malformed[0].value, null);
+
+// formulajs missing entirely: arithmetic still works, functions do not
+const noLib = evaluateResponse('=FV(8%,10,0,-1000)\n=2+2', null);
+equal('no formulajs: function yields null', noLib[0].value, null);
+equal('no formulajs: arithmetic still computes', noLib[1].value, '4.00');
 
 // ---- summary ----
 if (failures.length === 0) {

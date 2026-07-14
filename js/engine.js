@@ -195,3 +195,54 @@ export function evaluateFormula(formula, fns, vars = {}) {
   }
   return value;
 }
+
+/**
+ * |value| < 1 → rate/ratio presentation: 4 decimals + percent equivalent.
+ * Otherwise → currency-scale: thousands separators, 2 decimals.
+ */
+export function formatValue(value) {
+  if (Math.abs(value) < 1) {
+    return `${value.toFixed(4)} (${(value * 100).toFixed(2)}%)`;
+  }
+  return value.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+const LABEL_NAME_RE = /\[([A-Za-z][A-Za-z0-9_]*)\]/;
+
+/**
+ * Evaluates a full response from Claude. Returns its non-empty lines in
+ * order, each annotated { text, kind: 'formula'|'text', value: string|null }.
+ * A text line containing [NAME] declares that name for the next formula's
+ * result; later formulas may reference it as a placeholder. Any evaluation
+ * failure yields value: null for that line only.
+ */
+export function evaluateResponse(text, fns = buildFunctionTable(globalThis.formulajs)) {
+  const vars = {};
+  let pendingName = null;
+  const lines = [];
+  for (const raw of text.split('\n')) {
+    const line = raw.trim();
+    if (!line) continue;
+    if (line.startsWith('=')) {
+      let value = null;
+      try {
+        const n = evaluateFormula(line, fns, vars);
+        value = formatValue(n);
+        if (pendingName) vars[pendingName] = n;
+      } catch {
+        // Parse error, unsupported function, unresolved placeholder, or
+        // formulajs error: show the formula without a value. Never guess.
+      }
+      pendingName = null;
+      lines.push({ text: line, kind: 'formula', value });
+    } else {
+      const match = LABEL_NAME_RE.exec(line);
+      pendingName = match ? match[1].toUpperCase() : null;
+      lines.push({ text: line, kind: 'text', value: null });
+    }
+  }
+  return lines;
+}
