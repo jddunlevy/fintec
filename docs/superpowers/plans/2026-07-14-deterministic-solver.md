@@ -403,7 +403,7 @@ const FNS = buildFunctionTable(formulajs);
 
 // TVM
 approx('FV lump sum', evaluateFormula('=FV(8%,10,0,-1000)', FNS), 2158.92, 0.01);
-approx('FV annuity due', evaluateFormula('=FV(8%,10,-1000,0,1)', FNS), 15645.59, 0.01);
+approx('FV annuity due', evaluateFormula('=FV(8%,10,-1000,0,1)', FNS), 15645.49, 0.01);
 approx('PMT loan payment', evaluateFormula('=PMT(5%,10,-10000)', FNS), 1295.05, 0.01);
 approx('RATE (inverse of PMT case)', evaluateFormula('=RATE(10,-1295.0457496545667,10000)', FNS), 0.05, 1e-6);
 approx('NPER (inverse of PMT case)', evaluateFormula('=NPER(5%,-1295.0457496545667,10000)', FNS), 10, 1e-6);
