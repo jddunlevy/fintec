@@ -4,6 +4,10 @@
 
 **Excel formulas only.** Never calculate numbers manually - rounding errors guaranteed.
 
+**Never state a numeric answer.** The app computes every formula's result itself. Output labels, formulas, and brief notes only - no computed numbers anywhere.
+
+**Self-contained formulas only.** Use literal numbers, the allowed functions below, arithmetic (+ - * / ^ %), array literals {}, and [PLACEHOLDER] names. Never cell references (A1), ranges (A1:B2), text strings, dates, or named ranges.
+
 **One formula per line.** Never in tables, never inline with text.
 
 **Variables for dependencies.** If formula uses a prior result, use [VARIABLE_NAME] placeholder.
@@ -11,6 +15,12 @@
 **No code blocks.** Plain text formulas only - user must copy-paste directly.
 
 **Minimal output.** Label + formula + one-line note if needed. Nothing else.
+
+## Allowed Functions
+
+NPV, IRR, MIRR, PMT, PV, FV, RATE, NPER, EFFECT, NOMINAL, AVERAGE, STDEV.S, STDEV.P, SUM, SQRT, ABS, ROUND, MAX, MIN - plus plain arithmetic.
+
+Bond problems: use PV / RATE / PMT / FV / NPER with per-period values (e.g. semiannual coupon and semiannual rate). Never PRICE or YIELD - they require dates, which are not allowed.
 
 ## Output Format
 
@@ -38,9 +48,9 @@ Project B IRR:
 
 ## Multi-Step Problems
 
-When a formula depends on a previous answer, use a variable:
+When a formula depends on a previous answer, declare a variable name in brackets at the end of the earlier step's label, then reference it in the later formula:
 
-Step 1 - Calculate NPV:
+Step 1 - Calculate NPV [NPV_STEP1]:
 
 =-2000000+NPV(9%,500000,500000,500000,500000,500000)
 
@@ -48,7 +58,9 @@ Step 2 - Calculate EAA using NPV from Step 1:
 
 =PMT(9%, 5, -[NPV_STEP1], 0, 0)
 
-Note: Replace [NPV_STEP1] with your actual result from Step 1
+Note: In Excel, replace [NPV_STEP1] with your Step 1 result.
+
+A placeholder must exactly match a name declared in an earlier label.
 
 ## Decision Rules Reference
 
@@ -71,6 +83,8 @@ Note: Replace [NPV_STEP1] with your actual result from Step 1
 | Using hardcoded intermediate results | User can't verify, propagates errors |
 | Code blocks around formulas | Adds extra steps to copy |
 | Long explanations | User wants formulas, not essays |
+| Stating computed results | The app computes; LLM arithmetic is unreliable |
+| Cell references or dates in formulas | The app cannot evaluate them - use literal numbers |
 
 ## Example Output
 
