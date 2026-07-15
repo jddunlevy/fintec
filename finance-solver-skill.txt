@@ -62,6 +62,130 @@ Note: In Excel, replace [NPV_STEP1] with your Step 1 result.
 
 A placeholder must exactly match a name declared in an earlier label.
 
+## Erosion (Cannibalization) Problems
+
+When a new product reduces sales of existing products, erosion cost is the lost contribution margin: one term per affected product, units lost times (price - unit cost).
+
+Erosion Cost [EROSION_COST]:
+
+=112000*(0.80-0.21)+38000*(0.47-0.19)+25000*(0.53-0.18)+7000*(0.45-0.25)+10000*(0.56-0.31)
+
+Net change in margin = new product contribution margin minus erosion cost:
+
+Net Change in Annual Margin:
+
+=225000*(0.92-0.75)-[EROSION_COST]
+
+Note: Net change < 0 means adding the product reduces total margin
+
+## Opportunity Cost and Sunk Costs
+
+Historical prices paid for assets already owned are sunk costs - never include them in project cash flows. An owned asset used by a project enters at its current market value (the opportunity cost of not selling it), subtracted from the project's NPV.
+
+Adjusted NPV (studio NPV minus land's current market value):
+
+=560000-760000
+
+Note: Use current market value, not historical cost. If adjusted NPV < 0, reject
+
+## Working Capital (Inventory) Cash Flow
+
+Inventory is held one month ahead of sales. For each month: beginning inventory = current month's sales * inventory percent; ending inventory = NEXT month's sales * inventory percent. Monthly cash flow = -(ending - beginning) * unit cost = -pct*(next month sales - current month sales)*cost. An inventory increase is a use of cash (negative); a decrease is a source of cash (positive). The last listed month cannot be computed without the following month's sales - say so instead of guessing.
+
+January Inventory Cash Flow:
+
+=-11%*(2100000-2100000)*0.007
+
+February Inventory Cash Flow:
+
+=-11%*(2900000-2100000)*0.007
+
+March Inventory Cash Flow:
+
+=-11%*(3000000-2900000)*0.007
+
+Note: April requires May sales. Negative = use of cash; positive = source of cash
+
+## Depreciation Schedules (Straight-Line and MACRS)
+
+Straight-line with half-year convention: annual depreciation = cost / life. The first and last years take half, so the schedule spans life + 1 years.
+
+Straight-Line Annual Depreciation [SL_ANNUAL]:
+
+=94000/7
+
+Year 1 and Final Year (half-year convention):
+
+=[SL_ANNUAL]/2
+
+MACRS: each year's depreciation = cost * that year's percentage from the photographed table.
+
+MACRS Year 1:
+
+=94000*14.29%
+
+After-tax: depreciation tax shield = depreciation * tax rate. Emit one formula per year requested.
+
+MACRS Year 1 Tax Shield:
+
+=94000*14.29%*40%
+
+Note: Both methods depreciate the same total; MACRS only accelerates the timing
+
+## Cost Recovery (After-Tax Cash Flow from Asset Sale)
+
+Book value = cost * (1 - sum of MACRS percentages for the years of service). After-tax cash flow from sale = price - (price - book value) * tax rate. A sale below book value produces a tax credit, so the same formula works for gains and losses.
+
+Book Value After 4 Years [BOOK_VALUE]:
+
+=82000*(1-(14.29%+24.49%+17.49%+12.49%))
+
+After-Tax Cash Flow if Sold at 30000:
+
+=30000-(30000-[BOOK_VALUE])*40%
+
+Note: Selling exactly at book value means no gain and no tax
+
+## Operating Cash Flow Series and Project NPV
+
+Year t OCF = (revenue - fixed costs - depreciation) * (1 - tax rate) + depreciation, where revenue net of variable costs at c% of sales = (1-c%)*quantity*price*((1+quantity growth)*(1+price growth))^(t-1), and depreciation = equipment cost * that year's MACRS percent (zero once the table is exhausted). Declare every year [OCF1]...[OCFn], one formula per year, then discount them all.
+
+Year 1 OCF [OCF1]:
+
+=((1-55%)*30000*43*(1.04*1.02)^0-360000-2200000*14.29%)*(1-38%)+2200000*14.29%
+
+Year 9 OCF [OCF9] (depreciation exhausted):
+
+=((1-55%)*30000*43*(1.04*1.02)^8-360000)*(1-38%)
+
+Project NPV (after-tax salvage added to the final year):
+
+=-2200000+NPV(8%,[OCF1],[OCF2],[OCF3],[OCF4],[OCF5],[OCF6],[OCF7],[OCF8],[OCF9],[OCF10]+130000*(1-38%))
+
+Note: Salvage of fully depreciated equipment is taxed at the full tax rate
+
+## Incremental Cash Flows with NWC and IRR
+
+Year 0 = -(equipment cost + NWC increase). Final year adds after-tax salvage and NWC recovery to that year's OCF. If the asset is sold before the MACRS table ends, book value = cost * sum of remaining percentages. Build the IRR array from placeholders:
+
+Year 1 OCF [OCF1]:
+
+=((27000-20000)*250-1100000-4500000*20%)*(1-30%)+4500000*20%
+
+Book Value End of Year 5 [BOOK_VALUE]:
+
+=4500000*5.76%
+
+After-Tax Salvage [SALVAGE]:
+
+=500000-(500000-[BOOK_VALUE])*30%
+
+Project IRR:
+
+=IRR({-4500000-600000,[OCF1],[OCF2],[OCF3],[OCF4],[OCF5]+[SALVAGE]+600000})
+
+Note: NWC out at year 0 and back in the final year; IRR > cost of capital means accept
+
 ## Decision Rules Reference
 
 **NPV:** If NPV > 0, accept

@@ -201,6 +201,7 @@ export function evaluateFormula(formula, fns, vars = {}) {
  * Otherwise → currency-scale: thousands separators, 2 decimals.
  */
 export function formatValue(value) {
+  if (Object.is(value, -0)) value = 0; // never display "-0.00"
   if (value !== 0 && Math.abs(value) < 1) {
     return `${value.toFixed(4)} (${(value * 100).toFixed(2)}%)`;
   }

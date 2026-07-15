@@ -131,6 +131,131 @@ check('chained: step 2 uses computed step 1',
   `got ${chained[3].value}`);
 equal('chained: note preserved verbatim', chained[4].text, 'Note: NPV < 0 means reject');
 
+// Erosion (cannibalization): Heavenly Cookie practice problem.
+// Erosion = lost cookie margin; net change = brownie margin - erosion.
+const erosion = evaluateResponse(
+  [
+    'Erosion Cost [EROSION_COST]:',
+    '=112000*(0.80-0.21)+38000*(0.47-0.19)+25000*(0.53-0.18)+7000*(0.45-0.25)+10000*(0.56-0.31)',
+    'Net Change in Annual Margin:',
+    '=225000*(0.92-0.75)-[EROSION_COST]',
+  ].join('\n'),
+  FNS,
+);
+equal('erosion: cost', erosion[1].value, '89,370.00');
+equal('erosion: net margin change', erosion[3].value, '-51,120.00');
+
+// Opportunity cost: Revolution Records practice problem.
+// Land enters at current market value (opportunity cost), not sunk historical cost.
+const oppCost = evaluateResponse(
+  'Adjusted NPV (studio NPV minus land market value):\n=560000-760000',
+  FNS,
+);
+equal('opportunity cost: adjusted NPV', oppCost[1].value, '-200,000.00');
+
+// Working capital: Cool Water inventory practice problem.
+// Look-ahead convention: month's ending inventory covers NEXT month's sales.
+// Cash flow = -pct*(next month sales - current month sales)*cost.
+const inventory = evaluateResponse(
+  [
+    'January Inventory Cash Flow:',
+    '=-11%*(2100000-2100000)*0.007',
+    'February Inventory Cash Flow:',
+    '=-11%*(2900000-2100000)*0.007',
+    'March Inventory Cash Flow:',
+    '=-11%*(3000000-2900000)*0.007',
+  ].join('\n'),
+  FNS,
+);
+equal('inventory: flat January is 0.00 (not -0.00)', inventory[1].value, '0.00');
+equal('inventory: February use of cash', inventory[3].value, '-616.00');
+equal('inventory: March use of cash', inventory[5].value, '-77.00');
+equal('format normalizes -0', formatValue(-0), '0.00');
+
+// Depreciation: Richardses' Tree Farm practice problem.
+// SL half-year convention chains off [SL_ANNUAL]; MACRS uses table percents.
+const depreciation = evaluateResponse(
+  [
+    'Straight-Line Annual Depreciation [SL_ANNUAL]:',
+    '=94000/7',
+    'Year 1 and Final Year (half-year convention):',
+    '=[SL_ANNUAL]/2',
+    'MACRS Year 1:',
+    '=94000*14.29%',
+    'MACRS Year 1 Tax Shield:',
+    '=94000*14.29%*40%',
+  ].join('\n'),
+  FNS,
+);
+equal('depreciation: SL annual', depreciation[1].value, '13,428.57');
+equal('depreciation: SL half-year', depreciation[3].value, '6,714.29');
+equal('depreciation: MACRS year 1', depreciation[5].value, '13,432.60');
+equal('depreciation: MACRS year 1 tax shield', depreciation[7].value, '5,373.04');
+
+// Cost recovery: Richardses' Tree Farm sale practice problem.
+// ATCF = price - (price - book value) * tax rate; loss yields a tax credit.
+const costRecovery = evaluateResponse(
+  [
+    'Book Value After 4 Years [BOOK_VALUE]:',
+    '=82000*(1-(14.29%+24.49%+17.49%+12.49%))',
+    'After-Tax Cash Flow if Sold at 30000:',
+    '=30000-(30000-[BOOK_VALUE])*40%',
+    'After-Tax Cash Flow if Sold at 25616.80:',
+    '=25616.80-(25616.80-[BOOK_VALUE])*40%',
+    'After-Tax Cash Flow if Sold at 22000:',
+    '=22000-(22000-[BOOK_VALUE])*40%',
+  ].join('\n'),
+  FNS,
+);
+equal('cost recovery: book value', costRecovery[1].value, '25,616.80');
+equal('cost recovery: gain sale', costRecovery[3].value, '28,246.72');
+equal('cost recovery: at-book sale', costRecovery[5].value, '25,616.80');
+equal('cost recovery: loss sale (tax credit)', costRecovery[7].value, '23,446.72');
+
+// OCF series + project NPV: Miglietti Restaurants practice problem.
+// Ten chained OCF years (MACRS dies after year 8), salvage in the NPV call.
+const migliettiDep = ['14.29%', '24.49%', '17.49%', '12.49%', '8.93%', '8.93%', '8.93%', '4.45%'];
+const migliettiLines = [];
+for (let t = 1; t <= 10; t++) {
+  migliettiLines.push(`Year ${t} OCF [OCF${t}]:`);
+  const margin = `(1-55%)*30000*43*(1.04*1.02)^${t - 1}`;
+  migliettiLines.push(t <= 8
+    ? `=(${margin}-360000-2200000*${migliettiDep[t - 1]})*(1-38%)+2200000*${migliettiDep[t - 1]}`
+    : `=(${margin}-360000)*(1-38%)`);
+}
+migliettiLines.push('Project NPV:');
+migliettiLines.push('=-2200000+NPV(8%,[OCF1],[OCF2],[OCF3],[OCF4],[OCF5],[OCF6],[OCF7],[OCF8],[OCF9],[OCF10]+130000*(1-38%))');
+const miglietti = evaluateResponse(migliettiLines.join('\n'), FNS);
+equal('OCF series: year 1', miglietti[1].value, '256,174.40');
+equal('OCF series: year 2 (peak MACRS)', miglietti[3].value, '363,328.93');
+equal('OCF series: year 9 (no depreciation)', miglietti[17].value, '353,914.52');
+equal('OCF series: year 10', miglietti[19].value, '389,003.08');
+equal('OCF series: project NPV', miglietti[21].value, '58,274.64');
+
+// Incremental cash flows + IRR: Classic Autos practice problem.
+// Exercises placeholders and expressions inside an IRR array literal.
+const classicDep = ['20%', '32%', '19.2%', '11.52%', '11.52%'];
+const classicQty = [250, 290, 340, 360, 320];
+const classicLines = [];
+for (let t = 1; t <= 5; t++) {
+  classicLines.push(`Year ${t} OCF [OCF${t}]:`);
+  classicLines.push(`=((27000-20000)*${classicQty[t - 1]}-1100000-4500000*${classicDep[t - 1]})*(1-30%)+4500000*${classicDep[t - 1]}`);
+}
+classicLines.push(
+  'Book Value End of Year 5 [BOOK_VALUE]:',
+  '=4500000*5.76%',
+  'After-Tax Salvage [SALVAGE]:',
+  '=500000-(500000-[BOOK_VALUE])*30%',
+  'Project IRR:',
+  '=IRR({-4500000-600000,[OCF1],[OCF2],[OCF3],[OCF4],[OCF5]+[SALVAGE]+600000})',
+);
+const classic = evaluateResponse(classicLines.join('\n'), FNS);
+equal('incremental: year 1 OCF', classic[1].value, '725,000.00');
+equal('incremental: year 5 OCF', classic[9].value, '953,520.00');
+equal('incremental: book value at sale', classic[11].value, '259,200.00');
+equal('incremental: after-tax salvage', classic[13].value, '427,760.00');
+equal('incremental: IRR with placeholder array', classic[15].value, '0.0542 (5.42%)');
+
 // failure containment: one bad line never poisons the rest
 const contained = evaluateResponse('A:\n=FOO(1,2)\nB:\n=2+2', FNS);
 equal('containment: unknown fn yields null', contained[1].value, null);
