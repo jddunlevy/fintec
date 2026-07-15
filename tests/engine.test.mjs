@@ -256,6 +256,77 @@ equal('incremental: book value at sale', classic[11].value, '259,200.00');
 equal('incremental: after-tax salvage', classic[13].value, '427,760.00');
 equal('incremental: IRR with placeholder array', classic[15].value, '0.0542 (5.42%)');
 
+// WACC: Eric's all-debt funding practice problem.
+const wacc = evaluateResponse(
+  'WACC:\n=(2906*8%+1861*10%+1233*16%)/(2906+1861+1233)',
+  FNS,
+);
+equal('WACC: all-debt weighted average', wacc[1].value, '0.1026 (10.26%)');
+
+// Book value adjusted WACC: Trout, Inc. practice problem.
+// Current liabilities excluded; weights = LT liabilities and owners' equity.
+const troutWacc = evaluateResponse(
+  'Book Value Adjusted WACC:\n=(7417504*7.2%+3300529*11.82%)/(7417504+3300529)',
+  FNS,
+);
+equal('WACC: book value adjusted (Trout)', troutWacc[1].value, '0.0862 (8.62%)');
+
+// Market value WACC: Salmon Enterprises practice problem.
+// Debt = bonds * price; equity = shares * price, computed inside the weights.
+const salmonWacc = evaluateResponse(
+  'Market Value WACC:\n=(3000*933.94*7.2%+260000*38.11*11.82%)/(3000*933.94+260000*38.11)',
+  FNS,
+);
+equal('WACC: market value (Salmon)', salmonWacc[1].value, '0.1080 (10.80%)');
+
+// Three-component WACC (debt + preferred + common): DMI practice problem.
+const dmiWacc = evaluateResponse(
+  [
+    'Book Value Adjusted WACC:',
+    '=(60000*11.7%+14000*15.61%+23000*19.96%)/(60000+14000+23000)',
+    'Market Value WACC:',
+    '=(60000*1047.22*11.7%+140000*95.65*15.61%+920000*32.53*19.96%)/(60000*1047.22+140000*95.65+920000*32.53)',
+  ].join('\n'),
+  FNS,
+);
+equal('WACC: three-component book value (DMI)', dmiWacc[1].value, '0.1422 (14.22%)');
+equal('WACC: three-component market value (DMI)', dmiWacc[3].value, '0.1452 (14.52%)');
+
+// Cost of preferred stock with flotation fee: Kyle practice problem.
+const preferred = evaluateResponse(
+  'Cost of Preferred Stock:\n=95*6.2%/(66.38*(1-2%))',
+  FNS,
+);
+equal('preferred: cost with flotation fee', preferred[1].value, '0.0905 (9.05%)');
+
+// SML / CAPM cost of equity: Stan practice problem. Beta 0.95 lands on a
+// float artifact (0.13254999...) that the Excel-style 15-digit scrub fixes.
+const sml = evaluateResponse(
+  [
+    'Cost of Equity (beta 0.52):',
+    '=4.8%+0.52*(13.7%-4.8%)',
+    'Cost of Equity (beta 0.95):',
+    '=4.8%+0.95*(13.7%-4.8%)',
+    'Cost of Equity (beta 0.99):',
+    '=4.8%+0.99*(13.7%-4.8%)',
+    'Cost of Equity (beta 1.36):',
+    '=4.8%+1.36*(13.7%-4.8%)',
+  ].join('\n'),
+  FNS,
+);
+equal('SML: beta 0.52', sml[1].value, '0.0943 (9.43%)');
+equal('SML: beta 0.95 rounds like Excel', sml[3].value, '0.1326 (13.26%)');
+equal('SML: beta 0.99', sml[5].value, '0.1361 (13.61%)');
+equal('SML: beta 1.36', sml[7].value, '0.1690 (16.90%)');
+equal('format scrubs float artifact', formatValue(0.048 + 0.95 * (0.137 - 0.048)), '0.1326 (13.26%)');
+
+// Reverse SML (solve for beta): Magellan practice problem.
+const projectBeta = evaluateResponse(
+  'Project Beta:\n=(17.2%-3.1%)/(12.2%-3.1%)',
+  FNS,
+);
+equal('SML: beta from expected return', projectBeta[1].value, '1.55');
+
 // failure containment: one bad line never poisons the rest
 const contained = evaluateResponse('A:\n=FOO(1,2)\nB:\n=2+2', FNS);
 equal('containment: unknown fn yields null', contained[1].value, null);

@@ -201,6 +201,10 @@ export function evaluateFormula(formula, fns, vars = {}) {
  * Otherwise → currency-scale: thousands separators, 2 decimals.
  */
 export function formatValue(value) {
+  // Excel displays at most 15 significant digits; doing the same scrubs
+  // binary float artifacts (0.048+0.95*0.089 = 0.13254999... -> 0.13255)
+  // so boundary values round the way Excel rounds them.
+  value = parseFloat(value.toPrecision(15));
   if (Object.is(value, -0)) value = 0; // never display "-0.00"
   if (value !== 0 && Math.abs(value) < 1) {
     return `${value.toFixed(4)} (${(value * 100).toFixed(2)}%)`;

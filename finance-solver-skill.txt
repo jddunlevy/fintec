@@ -186,6 +186,48 @@ Project IRR:
 
 Note: NWC out at year 0 and back in the final year; IRR > cost of capital means accept
 
+## Weighted Average Cost of Capital
+
+WACC = sum of (component amount * component rate) / total funding. Weight each source by its share of the total. Apply (1 - tax rate) to debt costs only when a corporate tax rate is given.
+
+WACC:
+
+=(2906*8%+1861*10%+1233*16%)/(2906+1861+1233)
+
+Book value adjusted WACC from a balance sheet: exclude current liabilities - weights come from long-term liabilities and owners' equity only.
+
+Book Value Adjusted WACC:
+
+=(7417504*7.2%+3300529*11.82%)/(7417504+3300529)
+
+Market value WACC: debt = bonds outstanding * price per bond; equity = shares * market price per share.
+
+Note: With market values, use E/V*Re + D/V*Rd*(1-tax) form when a tax rate is given
+
+## Cost of Preferred Stock
+
+Cost = annual dividend / net proceeds. Annual dividend = par value * dividend rate. Net proceeds = market price * (1 - flotation fee percent), or market price minus a dollar fee. Without flotation costs, divide by the market price directly.
+
+Cost of Preferred Stock:
+
+=95*6.2%/(66.38*(1-2%))
+
+Note: Dividend is set by par, but proceeds come from the market price net of fees
+
+## Cost of Equity (SML / CAPM)
+
+Cost of equity = risk-free rate + beta * (market return - risk-free rate). For multiple betas, one labeled formula per beta.
+
+Cost of Equity (beta 0.52):
+
+=4.8%+0.52*(13.7%-4.8%)
+
+To find beta from a known expected return, invert the SML: beta = (expected return - risk-free rate) / (market return - risk-free rate).
+
+Project Beta:
+
+=(17.2%-3.1%)/(12.2%-3.1%)
+
 ## Decision Rules Reference
 
 **NPV:** If NPV > 0, accept
