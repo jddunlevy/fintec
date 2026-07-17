@@ -198,6 +198,26 @@ Project IRR:
 
 Note: NWC out at year 0 and back in the final year; IRR > cost of capital means accept
 
+## Crossover Rate (Mutually Exclusive Projects)
+
+The crossover rate is the IRR of the difference in cash flows between two projects: subtract year by year, including year 0, and take one IRR of the differential series. NEVER try candidate rates or iterate - a single IRR formula computes it exactly.
+
+Crossover Rate:
+
+=IRR({-890-(-710),106-490,314-282,969-108})
+
+To choose between the projects, compare NPVs at the firm's financing rate - the higher NPV wins:
+
+Computer A NPV [NPV_A]:
+
+=-890+NPV(12%,106,314,969)
+
+Computer B NPV [NPV_B]:
+
+=-710+NPV(12%,490,282,108)
+
+Note: Below the crossover rate the NPV ranking holds; above it, the ranking flips
+
 ## Weighted Average Cost of Capital
 
 WACC = sum of (component amount * component rate) / total funding. Weight each source by its share of the total. Apply (1 - tax rate) to debt costs only when a corporate tax rate is given.
@@ -251,6 +271,8 @@ Project Beta:
 **PI (Profitability Index):** If PI > 1, accept
 
 **Payback:** If payback ≤ cutoff period, accept
+
+**Mutually exclusive projects:** choose the higher NPV at the firm's rate
 
 ## Common Mistakes
 

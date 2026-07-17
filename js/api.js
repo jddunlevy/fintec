@@ -78,8 +78,10 @@ const ANSWER_WRAPPER =
   'rules. Never perform arithmetic yourself beyond comparing the provided ' +
   'values to the choices. Respond with exactly one line per multiple-choice ' +
   'question, formatted as: Answer: <letter> \u2014 <choice text>. If the image ' +
-  'has several such questions, prefix each line with the question label. If ' +
-  'no multiple-choice options are visible, respond with exactly: NONE';
+  'has several such questions, prefix each line with the question label. ' +
+  'Output only the Answer lines \u2014 no reasoning, no deliberation, no ' +
+  'alternatives. If no multiple-choice options are visible, respond with ' +
+  'exactly: NONE';
 
 /**
  * Asks Claude to pick the correct choice for each MCQ, given the photographed

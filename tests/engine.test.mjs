@@ -256,6 +256,23 @@ equal('incremental: book value at sale', classic[11].value, '259,200.00');
 equal('incremental: after-tax salvage', classic[13].value, '427,760.00');
 equal('incremental: IRR with placeholder array', classic[15].value, '0.0542 (5.42%)');
 
+// Crossover rate: two-computer practice problem. Crossover = IRR of the
+// year-by-year differential cash flows; choice = higher NPV at the firm's rate.
+const crossover = evaluateResponse(
+  [
+    'Crossover Rate:',
+    '=IRR({-890-(-710),106-490,314-282,969-108})',
+    'Computer A NPV [NPV_A]:',
+    '=-890+NPV(12%,106,314,969)',
+    'Computer B NPV [NPV_B]:',
+    '=-710+NPV(12%,490,282,108)',
+  ].join('\n'),
+  FNS,
+);
+equal('crossover: differential IRR', crossover[1].value, '0.2210 (22.10%)');
+equal('crossover: NPV A at 12%', crossover[3].value, '144.68');
+equal('crossover: NPV B at 12%', crossover[5].value, '29.18');
+
 // WACC: Eric's all-debt funding practice problem.
 const wacc = evaluateResponse(
   'WACC:\n=(2906*8%+1861*10%+1233*16%)/(2906+1861+1233)',
