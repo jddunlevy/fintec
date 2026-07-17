@@ -399,6 +399,13 @@ equal(
   JSON.stringify(parseAnswers('Q1 Answer: B \u2014 reject\n\nQ2 Answer: D \u2014 5,102\n')),
   JSON.stringify(['Q1 Answer: B \u2014 reject', 'Q2 Answer: D \u2014 5,102']),
 );
+equal(
+  'answers: deliberation lines filtered, only Answer lines kept',
+  JSON.stringify(parseAnswers(
+    'Let me analyze...\nAnswer: D \u2014 22.1%, Computer A\nBecause NPV A > NPV B',
+  )),
+  JSON.stringify(['Answer: D \u2014 22.1%, Computer A']),
+);
 equal('answers: NONE yields null', parseAnswers('NONE'), null);
 equal('answers: empty reply yields null', parseAnswers('  \n '), null);
 

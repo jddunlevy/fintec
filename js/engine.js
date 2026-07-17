@@ -249,9 +249,9 @@ export function buildTranscript(lines) {
  * least one contains an Answer designation; null otherwise (e.g. "NONE").
  */
 export function parseAnswers(text) {
-  const lines = text.split('\n').map((s) => s.trim()).filter(Boolean);
-  const hasAnswer = lines.some((l) => /\banswer\s*[:(]/i.test(l));
-  return hasAnswer ? lines : null;
+  const answers = text.split('\n').map((s) => s.trim()).filter(Boolean)
+    .filter((l) => /\banswer\s*[:(]/i.test(l));
+  return answers.length > 0 ? answers : null;
 }
 
 const LABEL_NAME_RE = /\[([A-Za-z][A-Za-z0-9_]*)\]/;
