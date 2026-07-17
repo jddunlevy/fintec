@@ -257,18 +257,18 @@ equal('incremental: after-tax salvage', classic[13].value, '427,760.00');
 equal('incremental: IRR with placeholder array', classic[15].value, '0.0542 (5.42%)');
 
 // Depreciation method comparison: Carlos' Bakery oven practice problem.
-// NPV of choosing MACRS over SL = incremental tax shields discounted BOY.
+// Year 1 shield is CF0 (undiscounted); years 2-4 discounted via NPV.
 const deprComp = evaluateResponse(
   [
-    'Incremental Tax Shield NPV [INCR_NPV]:',
-    '=NPV(7%,(720000*33.33%-720000/4)*30%,(720000*44.45%-720000/4)*30%,(720000*14.81%-720000/4)*30%,(720000*7.41%-720000/4)*30%)',
+    'Year 1 Incremental Tax Shield [SHIELD1]:',
+    '=(720000*33.33%-720000/4)*30%',
     'NPV of Choosing MACRS:',
-    '=[INCR_NPV]*(1+7%)',
+    '=[SHIELD1]+NPV(7%,(720000*44.45%-720000/4)*30%,(720000*14.81%-720000/4)*30%,(720000*7.41%-720000/4)*30%)',
   ].join('\n'),
   FNS,
 );
-approx('depr comparison: incremental shields NPV', parseFloat(deprComp[1].value.replace(/,/g, '')), 6557.82, 0.5);
-approx('depr comparison: BOY-adjusted NPV ≈ $7,017', parseFloat(deprComp[3].value.replace(/,/g, '')), 7016.87, 0.5);
+equal('depr comparison: year 1 shield (CF0)', deprComp[1].value, '17,992.80');
+approx('depr comparison: NPV ≈ $7,017', parseFloat(deprComp[3].value.replace(/,/g, '')), 7016.87, 0.5);
 
 // Crossover rate: two-computer practice problem. Crossover = IRR of the
 // year-by-year differential cash flows; choice = higher NPV at the firm's rate.

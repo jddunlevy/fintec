@@ -146,17 +146,17 @@ Note: Both methods depreciate the same total; MACRS only accelerates the timing
 
 ## Depreciation Method Comparison (NPV of Choosing MACRS over Straight-Line)
 
-Compute the incremental tax shield each year: (MACRS depreciation - SL depreciation) * tax rate. Then discount. Depreciation tax savings are treated as beginning-of-year cash flows, so multiply the NPV by (1 + rate):
+Compute the incremental tax shield each year: (MACRS depreciation - SL depreciation) * tax rate. Year 1's shield is CF0 (not discounted); years 2-4 are CF1-CF3. This matches the financial-calculator convention where tax savings are realized at the START of each year:
 
-Incremental Tax Shield NPV (MACRS over SL) [INCR_NPV]:
+Year 1 Incremental Tax Shield (= CF0, not discounted) [SHIELD1]:
 
-=NPV(7%,(720000*33.33%-720000/4)*30%,(720000*44.45%-720000/4)*30%,(720000*14.81%-720000/4)*30%,(720000*7.41%-720000/4)*30%)
+=(720000*33.33%-720000/4)*30%
 
 NPV of Choosing MACRS:
 
-=[INCR_NPV]*(1+7%)
+=[SHIELD1]+NPV(7%,(720000*44.45%-720000/4)*30%,(720000*14.81%-720000/4)*30%,(720000*7.41%-720000/4)*30%)
 
-Note: Positive means MACRS is better — accelerated depreciation creates earlier tax shields
+Note: Positive means MACRS is better. Year 1 shield is CF0 because tax savings occur at the start of each year — do NOT discount all four years
 
 ## Cost Recovery (After-Tax Cash Flow from Asset Sale)
 
