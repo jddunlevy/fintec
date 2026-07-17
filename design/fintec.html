@@ -1,34 +1,20 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#000000">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="fintex">
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icon-180.png">
-  <link rel="stylesheet" href="style.css">
-  <title>fintex</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>fintec</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #111; display: flex; justify-content: center; padding: 32px; }
+  </style>
 </head>
 <body>
-
-  <!-- SETUP: no key in localStorage, or key cleared after 401 -->
-  <section id="screen-setup" class="screen">
-    <header class="setup-top">
-      <h1 class="wordmark">fintex</h1>
-      <div class="rule rule-full">────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────</div>
-      <div class="setup-field">
-        <p id="setup-prompt">enter API key to access this service</p>
-        <label class="visually-hidden" for="key-input">API key</label>
-        <input id="key-input" type="text" autocomplete="off" autocapitalize="none"
-               autocorrect="off" spellcheck="false" enterkeyhint="go" placeholder="sk-ant-...">
-      </div>
-      <div class="rule rule-short">────────────────────────────────────────────────────────────</div>
-    </header>
-    <div class="setup-art" aria-hidden="true">
-      <pre class="art-white">                                                                                                    
+  <div style="position:relative;width:390px;height:844px;background:#000000;box-shadow:0 2px 16px rgba(0,0,0,0.4);flex-shrink:0;">
+    <pre style="position:absolute;left:80px;top:184px;width:240px;height:240px;z-index:1;box-sizing:border-box;font-family:'JetBrains Mono', ui-monospace, monospace;font-size:4px;color:#ffffff;white-space:pre;line-height:1.2;overflow:hidden;margin:0;">                                                                                                    
                                                                                                     
                                                                                                     
                                                                                                     
@@ -78,7 +64,7 @@
                                                                                                     
                                                                                                     
                                                                                                     </pre>
-      <pre class="art-pink">                                         - +    =. -.                                                                   
+    <pre style="position:absolute;left:0px;top:144px;width:392px;height:392px;z-index:2;box-sizing:border-box;font-family:'JetBrains Mono', ui-monospace, monospace;font-size:5.444444444444445px;color:#d9869f;white-space:pre;line-height:1.2;overflow:hidden;margin:0;">                                         - +    =. -.                                                                   
                             --     #@@@@@=.:  *   =--.-                                                                 
                               *.                   : = .-                                                               
                             .+#      =           *=. =:*                                                                
@@ -138,48 +124,10 @@
 #=..:#.: *#@   -*     =@*%#=.  *-        --  .+=@     ..    @.+#*         . .+            :@+:  :                  .:*= 
 @@*-==.:: -@%.: =*      =@%%==  +-         =::  .@    .*      #.@@      .     =%:            %:%..   . ..    +*         
 .#@@+=*+.*:.@@   .@. :   -@@%+:  @#         :+*   .@-  %+        *+:             :=:        *:     *@@-. =.    -+       </pre>
-    </div>
-  </section>
-
-  <!-- CAMERA: live viewfinder -->
-  <section id="screen-camera" class="screen">
-    <div id="viewfinder">
-      <video id="preview" autoplay playsinline muted></video>
-    </div>
-    <p id="camera-denied" class="denied dim" hidden>CAMERA ACCESS DENIED<br>ENABLE IN SETTINGS</p>
-    <p id="camera-tip" class="tip" hidden>TIP: FILL THE FRAME WITH THE PROBLEM</p>
-    <div class="bottom-bar">
-      <button id="btn-capture" class="btn on-black" type="button" hidden>[ CAPTURE ]</button>
-    </div>
-  </section>
-
-  <!-- PROCESSING: frozen captured frame + indicator -->
-  <section id="screen-processing" class="screen">
-    <img id="frozen-frame" alt="">
-    <div class="processing-label">PROCESSING...<span class="cursor">▌</span></div>
-  </section>
-
-  <!-- RESULTS: raw formula text from Claude -->
-  <section id="screen-results" class="screen">
-    <div id="results-scroll"></div>
-    <div class="rule center">────────────────────────</div>
-    <div class="bottom-bar">
-      <button id="btn-another" class="btn" type="button">[ SOLVE ANOTHER ]</button>
-    </div>
-  </section>
-
-  <!-- ERROR: user-facing message + retry -->
-  <section id="screen-error" class="screen">
-    <div class="error-inner">
-      <p class="dim small">ERROR</p>
-      <p id="error-message"></p>
-    </div>
-    <div class="bottom-bar">
-      <button id="btn-retry" class="btn" type="button">[ TRY AGAIN ]</button>
-    </div>
-  </section>
-
-  <script src="js/vendor/formulajs.min.js"></script>
-  <script type="module" src="js/app.js"></script>
+    <div style="position:absolute;left:128px;top:16px;width:128px;height:56px;z-index:3;box-sizing:border-box;font-family:'JetBrains Mono', ui-monospace, monospace;font-size:32px;color:#ffffff;text-align:left;white-space:pre-wrap;line-height:1.4;overflow:hidden;">fintex</div>
+    <div style="position:absolute;left:64px;top:72px;width:264px;height:88px;z-index:4;box-sizing:border-box;font-family:'JetBrains Mono', ui-monospace, monospace;font-size:12px;color:#ffffff;text-align:left;white-space:pre-wrap;line-height:1.4;overflow:hidden;">enter API key to access this service</div>
+    <div style="position:absolute;left:0px;top:56px;width:400px;height:16px;z-index:5;box-sizing:border-box;display:flex;align-items:center;overflow:hidden;white-space:nowrap;font-family:ui-monospace,monospace;color:#ffffff;">──────────────────────────────────────────────────</div>
+    <div style="position:absolute;left:80px;top:112px;width:224px;height:16px;z-index:6;box-sizing:border-box;display:flex;align-items:center;overflow:hidden;white-space:nowrap;font-family:ui-monospace,monospace;color:#ffffff;">────────────────────────────</div>
+  </div>
 </body>
 </html>

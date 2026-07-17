@@ -52,6 +52,15 @@ html, body {
 }
 .rule.center { text-align: center; }
 
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
 /* Buttons are text: bracketed uppercase monospace strings, no filled shapes.
    Pressing inverts the video — the only feedback this app needs. */
 .btn {
@@ -85,50 +94,87 @@ html, body {
 }
 #screen-results .bottom-bar { position: static; padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
 
-/* ---- setup ---- */
+/* ---- setup ----
+   "fintex" entry screen. All geometry derives from the 390pt-wide design
+   canvas (design/fintec.md) via one scale unit: --u = scaled design pixel. */
 
-#screen-setup { justify-content: center; }
+#screen-setup {
+  --u: calc(min(100vw, 420px) / 390);
+  overflow: hidden;
+}
 
-.setup-inner {
-  display: flex;
-  flex-direction: column;
-  gap: 26px;
-  padding: 0 24px;
+.setup-top {
+  padding-top: calc(16px + env(safe-area-inset-top));
+}
+
+.wordmark {
+  font-size: 32px;
+  font-weight: 400;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.setup-top .rule { color: var(--fg); }
+.rule-full { width: 100%; margin-top: 4px; }
+.rule-short {
+  width: calc(224 * var(--u));
+  margin: 16px auto 0;
+}
+
+.setup-field {
   max-width: 420px;
-  width: 100%;
-  margin: 0 auto;
+  margin: 12px auto 0;
+  padding: 0 24px 0 calc(64 * var(--u));
 }
 
-.title {
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-}
-
-.setup-inner p { font-size: 14px; line-height: 1.6; }
-
-.field { display: flex; flex-direction: column; gap: 10px; }
+#setup-prompt { font-size: 12px; line-height: 1.4; }
 
 #key-input {
+  display: block;
+  width: 100%;
   font: inherit;
-  font-size: 15px;
+  font-size: 16px; /* >=16px prevents iOS Safari zoom-on-focus */
   background: none;
   border: none;
-  border-bottom: 1px solid var(--dim);
   border-radius: 0;
   color: var(--fg);
   caret-color: var(--fg);
   padding: 8px 0;
 }
-#key-input:focus { outline: none; border-bottom-color: var(--fg); }
+#key-input:focus { outline: none; }
 #key-input::placeholder { color: var(--dim); opacity: 0.6; }
 
-.setup-actions {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  min-height: 48px;
-  margin-left: -16px; /* optically align bracket with text column */
+/* Two layered ASCII art pieces, scaled as rigid character grids.
+   Design coords: pink at (0,144) size 392, white at (80,184) size 240;
+   the art container's top corresponds to y=144. */
+.setup-art {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  max-width: 420px;
+  margin: 16px auto 0;
+}
+
+.setup-art pre {
+  position: absolute;
+  line-height: 1.2;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.art-white {
+  top: calc(40 * var(--u));
+  left: calc(80 * var(--u));
+  font-size: calc(4 * var(--u));
+  color: var(--fg);
+}
+
+.art-pink {
+  top: 0;
+  left: 0;
+  font-size: calc(5.444 * var(--u));
+  color: #d9869f;
 }
 
 /* ---- camera ---- */

@@ -1,6 +1,6 @@
 {
-  "name": "Finance Solver",
-  "short_name": "FINSOLVER",
+  "name": "fintex",
+  "short_name": "fintex",
   "description": "Photograph a finance problem. Get Excel formulas.",
   "start_url": ".",
   "display": "standalone",

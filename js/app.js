@@ -24,10 +24,8 @@ const els = {
     [AppState.RESULTS]: document.getElementById('screen-results'),
     [AppState.ERROR]: document.getElementById('screen-error'),
   },
-  setupNotice: document.getElementById('setup-notice'),
+  setupPrompt: document.getElementById('setup-prompt'),
   keyInput: document.getElementById('key-input'),
-  btnValidate: document.getElementById('btn-validate'),
-  setupStatus: document.getElementById('setup-status'),
   preview: document.getElementById('preview'),
   viewfinder: document.getElementById('viewfinder'),
   cameraDenied: document.getElementById('camera-denied'),
@@ -51,11 +49,11 @@ function show(state) {
 
 // ---- transitions ----
 
+const SETUP_PROMPT = 'enter API key to access this service';
+
 function enterSetup(notice) {
   Camera.stop();
-  els.setupNotice.textContent = notice ?? '';
-  els.setupNotice.hidden = !notice;
-  els.setupStatus.textContent = '';
+  els.setupPrompt.textContent = notice ?? SETUP_PROMPT;
   show(AppState.SETUP);
 }
 
@@ -95,33 +93,34 @@ function enterError(message) {
 
 // ---- setup: key entry + validation ----
 
+let validating = false;
+
 async function onValidate() {
+  if (validating) return;
+
   const key = els.keyInput.value.trim();
   if (!key) {
-    els.setupStatus.textContent = 'ENTER A KEY';
+    els.setupPrompt.textContent = 'enter a key';
     return;
   }
 
   els.keyInput.blur();
-  els.btnValidate.disabled = true;
-  els.btnValidate.hidden = true;
-  els.setupStatus.textContent = 'VALIDATING...';
+  validating = true;
+  els.setupPrompt.textContent = 'validating...';
 
   try {
     await Api.validate(key);
     localStorage.setItem(KEY_STORAGE, key);
     els.keyInput.value = ''; // never displayed after entry
-    els.setupNotice.hidden = true;
-    els.setupStatus.textContent = '';
+    els.setupPrompt.textContent = SETUP_PROMPT;
     enterCamera();
   } catch (err) {
-    els.setupStatus.textContent =
+    els.setupPrompt.textContent =
       err instanceof Api.ApiError && err.kind === 'unauthorized'
-        ? 'INVALID API KEY'
-        : 'CHECK CONNECTION'; // network failure: do not reject the key
+        ? 'invalid api key'
+        : 'check connection'; // network failure: do not reject the key
   } finally {
-    els.btnValidate.disabled = false;
-    els.btnValidate.hidden = false;
+    validating = false;
   }
 }
 
@@ -155,7 +154,7 @@ async function onCapture() {
         case 'unauthorized':
           // 401 anywhere → clear key, return to Setup.
           localStorage.removeItem(KEY_STORAGE);
-          enterSetup('KEY NO LONGER VALID');
+          enterSetup('key no longer valid');
           return;
         case 'http':
           enterError(`HTTP ${err.status} - TRY AGAIN`);
@@ -195,7 +194,6 @@ function renderResults(text) {
 
 // ---- wiring ----
 
-els.btnValidate.addEventListener('click', onValidate);
 els.keyInput.addEventListener('keydown', (event) => {
   if (event.key === 'Enter') onValidate();
 });
