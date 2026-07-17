@@ -11,10 +11,10 @@ const TIMEOUT_MS = 60000;
 // App wrapper text. Lives here, NOT in the skill file, so the skill can be
 // re-synced without clobbering app instructions.
 const WRAPPER =
-  'You will receive a photo of a computer screen. Solve every finance problem ' +
-  'visible in the image according to the rules below. If the image is unreadable, ' +
-  'or contains no finance problem, respond with exactly one line starting with ' +
-  '"ERROR:" followed by a brief reason.';
+  'You will receive a photo of a computer screen. Solve or answer every finance ' +
+  'problem visible in the image according to the rules below. If the image is ' +
+  'unreadable, or contains no finance problem, respond with exactly one line ' +
+  'starting with "ERROR:" followed by a brief reason.';
 
 let skillText = null;
 
