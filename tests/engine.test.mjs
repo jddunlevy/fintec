@@ -343,6 +343,48 @@ const noLib = evaluateResponse('=FV(8%,10,0,-1000)\n=2+2', null);
 equal('no formulajs: function yields null', noLib[0].value, null);
 equal('no formulajs: arithmetic still computes', noLib[1].value, '4.00');
 
+// ---- MCQ two-call flow: marker extraction, transcript, answer parsing ----
+import { extractMcq, buildTranscript, parseAnswers } from '../js/engine.js';
+
+// Marker: a text line that is exactly "MCQ" flags the response and is stripped.
+const mcqEval = evaluateResponse('Project NPV [NPV]:\n=100-985\nMCQ', FNS);
+const mcqOut = extractMcq(mcqEval);
+equal('mcq: marker detected', mcqOut.mcq, true);
+equal('mcq: marker line stripped', mcqOut.lines.length, 2);
+equal('mcq: kept lines intact', mcqOut.lines[1].value, '-885.00');
+
+const noMcqOut = extractMcq(evaluateResponse('NPV:\n=2+2', FNS));
+equal('mcq: absent marker → false', noMcqOut.mcq, false);
+equal('mcq: lines unchanged without marker', noMcqOut.lines.length, 2);
+
+// "MCQ" inside a longer label is not a marker.
+const mcqLabel = extractMcq(evaluateResponse('MCQ analysis for exam:\n=2+2', FNS));
+equal('mcq: substring label is not a marker', mcqLabel.mcq, false);
+
+// Transcript: computed formulas carry "→ value"; text and failed lines verbatim.
+const transcript = buildTranscript(
+  evaluateResponse('Project NPV [NPV]:\n=100-985\nBad:\n=FOO(1)', FNS),
+);
+equal(
+  'transcript: values appended, failures verbatim',
+  transcript,
+  'Project NPV [NPV]:\n=100-985 \u2192 -885.00\nBad:\n=FOO(1)',
+);
+
+// Answer parsing: second-call reply must contain at least one Answer line.
+equal(
+  'answers: single answer line kept',
+  JSON.stringify(parseAnswers('Answer: B \u2014 reject; NPV is negative')),
+  JSON.stringify(['Answer: B \u2014 reject; NPV is negative']),
+);
+equal(
+  'answers: multi-question lines kept',
+  JSON.stringify(parseAnswers('Q1 Answer: B \u2014 reject\n\nQ2 Answer: D \u2014 5,102\n')),
+  JSON.stringify(['Q1 Answer: B \u2014 reject', 'Q2 Answer: D \u2014 5,102']),
+);
+equal('answers: NONE yields null', parseAnswers('NONE'), null);
+equal('answers: empty reply yields null', parseAnswers('  \n '), null);
+
 // ---- summary ----
 if (failures.length === 0) {
   console.log(`ALL TESTS PASS (${passed})`);

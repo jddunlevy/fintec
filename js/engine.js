@@ -215,6 +215,45 @@ export function formatValue(value) {
   });
 }
 
+// ---- MCQ two-call flow ----
+// A response whose final text line is exactly "MCQ" contains multiple-choice
+// questions that depend on computed values. The app strips the marker, then
+// sends the verified transcript back to Claude to select letters.
+
+/**
+ * Splits evaluated lines into { mcq, lines }: mcq is true when a text line
+ * exactly equal to "MCQ" was present; such lines are removed from the output.
+ */
+export function extractMcq(lines) {
+  const kept = [];
+  let mcq = false;
+  for (const line of lines) {
+    if (line.kind === 'text' && line.text === 'MCQ') mcq = true;
+    else kept.push(line);
+  }
+  return { mcq, lines: kept };
+}
+
+/**
+ * Renders evaluated lines as the transcript for the answer-selection call:
+ * computed formula lines get " → value" appended; everything else verbatim.
+ */
+export function buildTranscript(lines) {
+  return lines
+    .map((l) => (l.value !== null ? `${l.text} \u2192 ${l.value}` : l.text))
+    .join('\n');
+}
+
+/**
+ * Parses the answer-selection reply. Returns trimmed non-empty lines when at
+ * least one contains an Answer designation; null otherwise (e.g. "NONE").
+ */
+export function parseAnswers(text) {
+  const lines = text.split('\n').map((s) => s.trim()).filter(Boolean);
+  const hasAnswer = lines.some((l) => /\banswer\s*[:(]/i.test(l));
+  return hasAnswer ? lines : null;
+}
+
 const LABEL_NAME_RE = /\[([A-Za-z][A-Za-z0-9_]*)\]/;
 
 /**

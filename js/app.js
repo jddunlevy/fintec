@@ -3,7 +3,7 @@
 import * as Camera from './camera.js';
 import * as Api from './api.js';
 import { canvasToBase64Jpeg } from './image.js';
-import { evaluateResponse } from './engine.js';
+import { evaluateResponse, extractMcq, buildTranscript, parseAnswers } from './engine.js';
 
 const AppState = {
   SETUP: 'setup',           // no key in localStorage
@@ -81,8 +81,8 @@ async function enterCamera() {
   }
 }
 
-function enterResults(text) {
-  renderResults(text);
+function enterResults(lines, answers) {
+  renderResults(lines, answers);
   show(AppState.RESULTS);
 }
 
@@ -146,7 +146,22 @@ async function onCapture() {
     if (text.startsWith('ERROR:')) {
       enterError(text.slice('ERROR:'.length).trim().toUpperCase());
     } else {
-      enterResults(text);
+      const { mcq, lines } = extractMcq(evaluateResponse(text));
+      let answers = null;
+      if (mcq) {
+        // Second round-trip: Claude picks letters using engine-verified
+        // values. Failure here never hides the formulas already computed;
+        // only a 401 escalates (outer catch clears the key).
+        try {
+          answers = parseAnswers(
+            await Api.pickAnswers(base64, buildTranscript(lines), key),
+          );
+        } catch (err) {
+          if (err instanceof Api.ApiError && err.kind === 'unauthorized') throw err;
+        }
+        answers ??= ["couldn't verify answer choices \u2014 try again"];
+      }
+      enterResults(lines, answers);
     }
   } catch (err) {
     if (err instanceof Api.ApiError) {
@@ -172,22 +187,33 @@ async function onCapture() {
 }
 
 // ---- results rendering ----
-// Engine annotates each line; formulas that computed get a "→ value" line.
-// Content rendered verbatim via textContent — no markup interpretation.
+// Answer lines render first (pink, the payoff), then the engine-annotated
+// working: formulas that computed get a "→ value" line. Conceptual Answer
+// lines from the first response are hoisted to the top alongside verified
+// second-call picks. Content rendered verbatim via textContent — no markup
+// interpretation.
 
-function renderResults(text) {
+const ANSWER_LINE_RE = /^answer\s*[:(]/i;
+
+function renderResults(lines, answers) {
   els.resultsScroll.replaceChildren();
-  for (const line of evaluateResponse(text)) {
+
+  function append(className, text) {
     const div = document.createElement('div');
-    div.className = line.kind === 'formula' ? 'line-formula' : 'line-label';
-    div.textContent = line.text;
+    div.className = className;
+    div.textContent = text;
     els.resultsScroll.appendChild(div);
-    if (line.value !== null) {
-      const val = document.createElement('div');
-      val.className = 'line-value';
-      val.textContent = `\u2192 ${line.value}`;
-      els.resultsScroll.appendChild(val);
-    }
+  }
+
+  const isAnswer = (l) => l.kind === 'text' && ANSWER_LINE_RE.test(l.text);
+  for (const answer of answers ?? []) append('line-answer', answer);
+  for (const line of lines) {
+    if (isAnswer(line)) append('line-answer', line.text);
+  }
+  for (const line of lines) {
+    if (isAnswer(line)) continue;
+    append(line.kind === 'formula' ? 'line-formula' : 'line-label', line.text);
+    if (line.value !== null) append('line-value', `\u2192 ${line.value}`);
   }
   els.resultsScroll.scrollTop = 0;
 }

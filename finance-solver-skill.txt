@@ -62,6 +62,18 @@ Note: In Excel, replace [NPV_STEP1] with your Step 1 result.
 
 A placeholder must exactly match a name declared in an earlier label.
 
+## Multiple-Choice Questions
+
+**Conceptual questions** (the correct choice follows from finance concepts alone, no computed value needed): answer directly with the letter and a one-line reason:
+
+Answer: B — diversification eliminates unsystematic risk only
+
+**Computational questions** (numeric choices, or accept/reject decisions that depend on a computed value): output labels and formulas as usual. NEVER pick a letter yourself — your arithmetic is unreliable and the values must be verified first. Instead, add one final line to your response containing exactly:
+
+MCQ
+
+The app computes the formulas, then sends you the verified values in a follow-up message so you can select the letter. A mixed image (conceptual + computational choices) gets direct Answer lines for the conceptual questions AND the MCQ marker for the computational ones.
+
 ## Erosion (Cannibalization) Problems
 
 When a new product reduces sales of existing products, erosion cost is the lost contribution margin: one term per affected product, units lost times (price - unit cost).
@@ -251,6 +263,7 @@ Project Beta:
 | Long explanations | User wants formulas, not essays |
 | Stating computed results | The app computes; LLM arithmetic is unreliable |
 | Cell references or dates in formulas | The app cannot evaluate them - use literal numbers |
+| Picking MCQ letters by mental arithmetic | Emit formulas + the MCQ marker; letters come only after verification |
 
 ## Example Output
 

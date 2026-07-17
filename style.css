@@ -8,6 +8,7 @@
   --bg:  #000000;
   --fg:  #ffffff;
   --dim: #8e8e8e;
+  --pink: #d9869f;
   --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas,
           "Liberation Mono", monospace;
 }
@@ -174,7 +175,7 @@ html, body {
   top: 0;
   left: 0;
   font-size: calc(5.444 * var(--u));
-  color: #d9869f;
+  color: var(--pink);
 }
 
 /* ---- camera ---- */
@@ -273,6 +274,18 @@ html, body {
   line-height: 1.35;
   color: var(--fg);
   margin: 0 0 12px;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+/* Verified MCQ answer: letter chosen against engine-computed values.
+   Rendered above the formulas, pink so it reads first. */
+.line-answer {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--pink);
+  margin: 0 0 14px;
   user-select: text;
   -webkit-user-select: text;
 }

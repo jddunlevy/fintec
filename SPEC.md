@@ -63,8 +63,11 @@ load ──────────────────► CAMERA       (key
 SETUP ─── validate OK ──► CAMERA
 CAMERA ── shutter ──────► PROCESSING(frame)   [auto-send, resized]
 PROCESSING ── reply ────► RESULTS(text)       (no "ERROR:" prefix)
+PROCESSING ── reply ends in "MCQ" line ─► second API call (answer selection),
+                          then RESULTS; non-401 failure of the second call
+                          still shows RESULTS with a "couldn't verify" note
 PROCESSING ── "ERROR:" or API/network failure ──► ERROR(message)
-PROCESSING ── HTTP 401 ─► SETUP               (key cleared)
+PROCESSING ── HTTP 401 (either call) ─► SETUP  (key cleared)
 RESULTS ── SOLVE ANOTHER ─► CAMERA
 ERROR ──── TRY AGAIN ─────► CAMERA
 ```
@@ -103,6 +106,14 @@ matching `<section>`. No router, no framework.
 - Model ID `claude-sonnet-4-5` in a single constant
 - Returns raw text or throws typed errors (network, HTTP status, parse).
   Caller checks `startsWith("ERROR:")`.
+- **Multiple-choice questions (two-call flow):** the skill prompt forbids
+  picking letters by LLM arithmetic. Conceptual MCQs are answered inline
+  (`Answer: <letter> — reason`). Computational MCQs end the first response
+  with a line containing exactly `MCQ`; the app evaluates the formulas, then
+  `pickAnswers()` re-sends the image plus the engine-verified transcript
+  (`formula → value` per line) and Claude selects letters by comparing
+  verified values to the photographed choices (`ANSWER_WRAPPER` system
+  prompt, `Answer: <letter> — <choice>` lines, `NONE` if no choices).
 
 **3. ImageProcessor (image.js)**
 - Resize captured frame to 1568px long edge via canvas, encode
@@ -112,6 +123,8 @@ matching `<section>`. No router, no framework.
 - Renders raw response text line by line: lines starting with `=` are formulas
   (large white monospace); other lines are labels/notes (gray)
   (skill output format preserved verbatim)
+- Verified MCQ answer lines (from the second call) appended after the
+  formulas; conceptual `Answer:` lines styled the same way
 - `[ SOLVE ANOTHER ]` button
 
 **5. Setup screen (section in index.html)**

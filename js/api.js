@@ -66,6 +66,51 @@ export async function solve(imageBase64, apiKey) {
   return text.trim();
 }
 
+// Second round-trip for multiple-choice questions: the first response only
+// emitted formulas; the engine computed the values; now Claude selects the
+// matching letter using verified numbers instead of its own arithmetic.
+const ANSWER_WRAPPER =
+  'You will receive a photo of a computer screen containing finance problems ' +
+  'with multiple-choice options, plus a transcript of formulas whose values ' +
+  'were computed by a verified calculation engine. For each multiple-choice ' +
+  'question visible in the photo, select the correct option by comparing the ' +
+  'verified values to the choices and applying standard finance decision ' +
+  'rules. Never perform arithmetic yourself beyond comparing the provided ' +
+  'values to the choices. Respond with exactly one line per multiple-choice ' +
+  'question, formatted as: Answer: <letter> \u2014 <choice text>. If the image ' +
+  'has several such questions, prefix each line with the question label. If ' +
+  'no multiple-choice options are visible, respond with exactly: NONE';
+
+/**
+ * Asks Claude to pick the correct choice for each MCQ, given the photographed
+ * problem and the engine-verified transcript. Returns raw response text.
+ */
+export async function pickAnswers(imageBase64, transcript, apiKey) {
+  const body = {
+    model: MODEL,
+    max_tokens: 512,
+    system: ANSWER_WRAPPER,
+    messages: [{
+      role: 'user',
+      content: [
+        {
+          type: 'image',
+          source: { type: 'base64', media_type: 'image/jpeg', data: imageBase64 },
+        },
+        {
+          type: 'text',
+          text: `Verified computed results:\n${transcript}\n\n` +
+            'Select the correct choice for each multiple-choice question.',
+        },
+      ],
+    }],
+  };
+  const data = await send(body, apiKey);
+  const text = (data.content ?? []).find((block) => block.type === 'text')?.text;
+  if (!text) throw new ApiError('malformed');
+  return text.trim();
+}
+
 /**
  * Minimal messages call to validate an API key (max_tokens: 1, user "hi").
  * Resolves on 200; throws ApiError('unauthorized') on 401,
